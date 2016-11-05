@@ -12,3 +12,15 @@ stack build
 npm install && npm run go
 open index.html
 ```
+
+## TODO
+
+- Type-safe interface
+- Use functions to build configuration instead of data constructors.
+- Support more chart options
+- Timeseries charts with `Day` values on x-axis
+- Support any numeric type as well as generic containers.
+
+## Contributing
+
+If you'd like to contribute to this project, don't hesitate to submit pull requests!
