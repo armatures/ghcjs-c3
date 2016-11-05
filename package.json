@@ -1,0 +1,25 @@
+{
+  "name": "ghcjs-c3",
+  "version": "0.0.1",
+  "description": "C3 bindings for GHCJS.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "go": "stack build && cp $(stack path --stack-yaml=./stack.yaml --dist-dir)/build/ghcjs-c3-exe/ghcjs-c3-exe.jsexe/all.js ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbeidler/ghcjs-c3.git"
+  },
+  "author": "Michael Beidler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mbeidler/ghcjs-c3/issues"
+  },
+  "homepage": "https://github.com/mbeidler/ghcjs-c3#readme",
+  "dependencies": {
+    "c3": "^0.4.11"
+  }
+}
