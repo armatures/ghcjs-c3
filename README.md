@@ -12,3 +12,13 @@ stack build
 npm install && npm run go
 open index.html
 ```
+
+## TODO
+
+- Type-safe interface
+- Support more chart options
+- Timeseries charts with `Day` values on x-axis
+
+## Contributing
+
+If you'd like to contribute to this project, don't hesitate to submit pull requests!
