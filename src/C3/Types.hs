@@ -18,6 +18,7 @@ data ChartOptions = ChartOptions
   , chartData :: ChartData
   }
 
+-- | The data source for our chart.
 data ChartData = ChartData
   { -- | The chart type.
     chartType    :: ChartType

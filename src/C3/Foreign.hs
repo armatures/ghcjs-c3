@@ -20,4 +20,3 @@ foreign import javascript unsafe
   \  document.body.appendChild(e);\
   \}createChartContainer($1);"
   js_createChartContainer :: JSString -> IO ()
-

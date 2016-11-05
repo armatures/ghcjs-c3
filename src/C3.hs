@@ -16,4 +16,3 @@ generate = (=<<) js_c3_generate . toJSVal_aeson
 -- | Alter the chart type of a previously rendered chart.
 transform :: Chart -> ChartType -> IO ()
 transform chart chartTyp = toJSVal_aeson chartTyp >>= js_c3_transform chart
-
