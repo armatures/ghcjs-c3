@@ -4,6 +4,7 @@ module C3.Types where
 
 import           Data.Aeson
 import           Data.Text   (Text)
+import           Data.Text (pack)
 import           GHCJS.Types (JSVal)
 import           Data.Vector (fromList)
 
@@ -16,6 +17,12 @@ data ChartOptions = ChartOptions
     bindTo    :: Text
     -- | The data sourcing the chart.
   , chartData :: ChartData
+  , chartSizeOptions :: Maybe ChartSizeOptions
+  }
+
+data ChartSizeOptions
+  = ChartSizeOptions
+  { _chart_size_height :: Int
   }
 
 -- | The data source for our chart.
@@ -25,6 +32,14 @@ data ChartData = ChartData
     -- | The columns of data.
   , chartColumns :: [Column]
   }
+
+data GaugeOpts
+  = GaugeOpt
+  { _gauge_min :: Int
+  , _gauge_max :: Int
+  , _gauge_units :: Text
+  , _gauge_width :: Int
+  } deriving Show
 
 -- | A column of data to source our chart.
 data Column = Column
@@ -46,12 +61,19 @@ data ChartType
   | Scatter
   | Pie
   | Donut
-  | Gauge
+  | Gauge GaugeOpts
+  deriving Show
 
 instance ToJSON ChartOptions where
   toJSON ChartOptions{..} = object [
     "bindto" .= bindTo,
-    "data"   .= chartData ]
+    "data"   .= chartData,
+    "size"   .= chartSizeOptions,
+    (pack $ show (chartType chartData)) .= chartType chartData]
+
+instance ToJSON ChartSizeOptions where
+  toJSON ChartSizeOptions{..} = object [
+    "height" .= _chart_size_height]
 
 instance ToJSON ChartData where
   toJSON ChartData{..} = object [
@@ -59,8 +81,16 @@ instance ToJSON ChartData where
     "columns" .= chartColumns ]
 
 instance ToJSON Column where
-  toJSON Column{..} = 
+  toJSON Column{..} =
     Array (fromList (String columnName : map toJSON columnValues))
+
+instance ToJSON GaugeOpts where
+  toJSON GaugeOpt{..} = object [
+      "min"   .= _gauge_min
+    , "max"   .= _gauge_max
+    , "units" .= _gauge_units
+    , "width" .= _gauge_width
+    ]
 
 instance ToJSON ChartType where
   toJSON Line       = String "line"
@@ -73,4 +103,4 @@ instance ToJSON ChartType where
   toJSON Scatter    = String "scatter"
   toJSON Pie        = String "pie"
   toJSON Donut      = String "donut"
-  toJSON Gauge      = String "gauge"
+  toJSON (Gauge _)  = String "gauge"
