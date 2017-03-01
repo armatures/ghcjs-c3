@@ -14,6 +14,9 @@ foreign import javascript unsafe "$1.transform($2);"
 foreign import javascript unsafe "$1.load($2);"
   js_c3_load :: Chart -> JSVal -> IO Chart
 
+foreign import javascript unsafe "$1.unload($2);"
+  js_c3_unload :: Chart -> JSVal -> IO Chart
+
 foreign import javascript unsafe
   "function createChartContainer(bindto) {\
   \  var e = document.createElement('div');\

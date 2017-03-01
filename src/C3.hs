@@ -14,8 +14,13 @@ import C3.Types   as X
 generate :: ChartOptions -> IO Chart
 generate = (=<<) js_c3_generate . toJSVal_aeson
 
-loadData :: Chart -> ChartData -> IO Chart
-loadData chart column_data = toJSVal_aeson column_data >>= js_c3_load chart
+-- | Load new data into an existing chart
+loadData :: Chart -> [Column]-> IO Chart
+loadData chart column_data = toJSVal_aeson (Columns column_data) >>= js_c3_load chart
+
+-- | Unload a specific data set from an existing chart
+-- unloadData :: Chart -> DataIndex -> IO Chart
+-- unloadData chart index = toJSVal_aeson index >>= js_c3_unload chart
 
 -- | Alter the chart type of a previously rendered chart.
 transform :: Chart -> ChartType -> IO ()

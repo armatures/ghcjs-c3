@@ -1,15 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module C3.Types where
 
 import           Data.Aeson
 import           Data.Text   (Text)
-import           Data.Text (pack)
+import           Data.Text (pack, toLower)
 import           GHCJS.Types (JSVal)
 import           Data.Vector (fromList)
 
 -- | A reference to the chart object returned by C3.
 newtype Chart = Chart { getChart :: JSVal }
+newtype DataIndex = DataIndex { ids :: Text } deriving ToJSON
+newtype Columns = Columns { columns :: [Column] }
 
 -- | The definition of the chart we want to generate.
 data ChartOptions = ChartOptions
@@ -68,8 +71,11 @@ instance ToJSON ChartOptions where
   toJSON ChartOptions{..} = object [
     "bindto" .= bindTo,
     "data"   .= chartData,
-    "size"   .= chartSizeOptions,
-    (pack $ show (chartType chartData)) .= chartType chartData]
+    header .= chartType chartData]
+    where
+      header = case chartType chartData of
+        (Gauge _) -> "gauge"
+        g -> toLower $ pack $ show g
 
 instance ToJSON ChartSizeOptions where
   toJSON ChartSizeOptions{..} = object [
@@ -77,8 +83,12 @@ instance ToJSON ChartSizeOptions where
 
 instance ToJSON ChartData where
   toJSON ChartData{..} = object [
-    "type"    .= chartType,
+    "type"    .= dumbType chartType,
     "columns" .= chartColumns ]
+    where
+      dumbType :: ChartType -> Text
+      dumbType (Gauge _) = "gauge"
+      dumbType o = toLower $ pack $ show o
 
 instance ToJSON Column where
   toJSON Column{..} =
@@ -103,4 +113,9 @@ instance ToJSON ChartType where
   toJSON Scatter    = String "scatter"
   toJSON Pie        = String "pie"
   toJSON Donut      = String "donut"
-  toJSON (Gauge _)  = String "gauge"
+  toJSON (Gauge g)  = object [ "gauge" .= toJSON g]
+
+instance ToJSON Columns where
+  toJSON (Columns c) = object [
+    "columns" .= toJSON c
+    ]
