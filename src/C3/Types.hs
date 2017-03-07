@@ -12,7 +12,13 @@ import           Data.Vector (fromList)
 -- | A reference to the chart object returned by C3.
 newtype Chart = Chart { getChart :: JSVal }
 newtype DataIndex = DataIndex { ids :: Text } deriving ToJSON
-newtype Columns = Columns { columns :: [Column] }
+
+mField :: (ToJSON a, Functor f) => Text -> f a -> f (Text, Value)
+mField field = fmap ((field .=) . toJSON)
+
+infixr 6 .=?
+(.=?) :: (ToJSON a, Functor f) => Text -> f a -> f (Text, Value)
+(.=?) = mField
 
 -- | The definition of the chart we want to generate.
 data ChartOptions = ChartOptions
@@ -33,7 +39,29 @@ data ChartData = ChartData
   { -- | The chart type.
     chartType    :: ChartType
     -- | The columns of data.
-  , chartColumns :: [Column]
+  , chartDatum :: Datum
+  }
+
+data Datum
+  = Columns [Column]
+  | Rows [Text] [[Double]]
+  -- | Url Text
+  -- | Json Text
+
+instance ToJSON Datum where
+  toJSON (Rows rowHeaders rowValues) = object [
+    "rows" .= [map toJSON rowHeaders, map toJSON rowValues] ]
+  toJSON (Columns columns) = object [ "columns" .= map toJSON columns ]
+
+instance ToJSON Column where
+  toJSON Column{..} = Array (fromList (String columnName : map toJSON columnValues))
+
+-- | A column of data to source our chart.
+data Column = Column
+  { -- | The datum name.
+    columnName   :: Text
+    -- | The associated data values.
+  , columnValues :: [Double]
   }
 
 data GaugeOpts
@@ -43,14 +71,6 @@ data GaugeOpts
   , _gauge_units :: Text
   , _gauge_width :: Int
   } deriving Show
-
--- | A column of data to source our chart.
-data Column = Column
-  { -- | The datum name.
-    columnName   :: Text
-    -- | The associated data values.
-  , columnValues :: [Double]
-  }
 
 -- | The type of chart.
 data ChartType
@@ -82,17 +102,19 @@ instance ToJSON ChartSizeOptions where
     "height" .= _chart_size_height]
 
 instance ToJSON ChartData where
-  toJSON ChartData{..} = object [
-    "type"    .= dumbType chartType,
-    "columns" .= chartColumns ]
+  toJSON ChartData{..} = object conjoined
     where
+      base = [ "type"    .= dumbType chartType ]
+      --XXX would be nice to `toJSON chartDatum` and combine with base
+      conjoined =  base ++ datum
+      datum = case chartDatum of
+        --XXX this should use the Rows toJSON instance (related to above)
+        Rows h r -> ["rows" .= [map toJSON h, map toJSON r] ]
+        Columns c -> ["columns" .= toJSON c]
+
       dumbType :: ChartType -> Text
       dumbType (Gauge _) = "gauge"
       dumbType o = toLower $ pack $ show o
-
-instance ToJSON Column where
-  toJSON Column{..} =
-    Array (fromList (String columnName : map toJSON columnValues))
 
 instance ToJSON GaugeOpts where
   toJSON GaugeOpt{..} = object [
@@ -114,8 +136,3 @@ instance ToJSON ChartType where
   toJSON Pie        = String "pie"
   toJSON Donut      = String "donut"
   toJSON (Gauge g)  = object [ "gauge" .= toJSON g]
-
-instance ToJSON Columns where
-  toJSON (Columns c) = object [
-    "columns" .= toJSON c
-    ]

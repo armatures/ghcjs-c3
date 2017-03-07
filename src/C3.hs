@@ -15,8 +15,8 @@ generate :: ChartOptions -> IO Chart
 generate = (=<<) js_c3_generate . toJSVal_aeson
 
 -- | Load new data into an existing chart
-loadData :: Chart -> [Column]-> IO Chart
-loadData chart column_data = toJSVal_aeson (Columns column_data) >>= js_c3_load chart
+loadData :: Chart -> Datum -> IO Chart
+loadData chart datum = toJSVal_aeson datum >>= js_c3_load chart
 
 -- | Unload a specific data set from an existing chart
 -- unloadData :: Chart -> DataIndex -> IO Chart
