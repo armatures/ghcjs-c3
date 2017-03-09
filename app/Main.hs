@@ -10,16 +10,16 @@ import C3.Chart.Gauge
 
 main :: IO ()
 main = do
-  js_createChartContainer "chart"
   js_createChartContainer "gauge-chart"
   js_createChartContainer "pie-chart"
-  chart <- generate opts
+  js_createChartContainer "chart"
   gaugeChart <- generate gaugeChartOpt
   pieChart <- generate pieChartOpt
   threadDelay (2 * second)
   _ <- load gaugeChart $ Columns [ Column "whatever" [80.9] ]
   threadDelay (2 * second)
   _ <- load pieChart pieData2
+  chart <- generate opts
   forever $ do
     forM_ [Area, Pie, Donut, Step] $ \typ -> do
       threadDelay (2 * second)
@@ -44,13 +44,13 @@ mainColumns = Columns
   ]
 
 largerChart :: Maybe ChartSizeOptions
-largerChart = Just $ ChartSizeOptions 280
+largerChart = Just $ ChartSizeOptions 250
 
 pieData :: Datum
-pieData = Rows ["US", "Them"] [[60,40]]
+pieData = Rows ["US", "Them"] [[60],[40]]
 
 pieData2 :: Datum
-pieData2 = Rows ["US", "Them", "something", "Gary Busey"] [[10,5,15,70]]
+pieData2 = Rows ["US", "Them", "something", "Gary Busey"] [[10],[5],[4],[8]]
 
 gaugeOpts :: GaugeOpts
-gaugeOpts = def { gaugeWidth = Just 138 }
+gaugeOpts = def { gaugeWidth = Just 25 }
