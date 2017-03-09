@@ -2,7 +2,7 @@ module C3
   ( module X
   , generate
   , transform
-  , loadData
+  , load
   ) where
 
 import GHCJS.Marshal (toJSVal_aeson)
@@ -15,8 +15,8 @@ generate :: ChartOptions -> IO Chart
 generate = (=<<) js_c3_generate . toJSVal_aeson
 
 -- | Load new data into an existing chart
-loadData :: Chart -> Datum -> IO Chart
-loadData chart datum = toJSVal_aeson datum >>= js_c3_load chart
+load :: Chart -> Datum -> IO Chart
+load chart datum = toJSVal_aeson datum >>= js_c3_load chart
 
 -- | Unload a specific data set from an existing chart
 -- unloadData :: Chart -> DataIndex -> IO Chart

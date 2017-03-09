@@ -15,9 +15,9 @@ main = do
   gaugeChart <- generate gaugeChartOpt
   pieChart <- generate pieChartOpt
   threadDelay (2 * second)
-  _ <- loadData gaugeChart $ Columns [ Column "whatever" [80.9] ]
+  _ <- load gaugeChart $ Columns [ Column "whatever" [80.9] ]
   threadDelay (2 * second)
-  _ <- loadData pieChart pieData2
+  _ <- load pieChart pieData2
   forever $ do
     forM_ [Area, Pie, Donut, Step] $ \typ -> do
       threadDelay (2 * second)
