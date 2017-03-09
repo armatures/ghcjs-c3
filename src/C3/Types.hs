@@ -119,4 +119,4 @@ instance ToJSON ChartType where
   toJSON Scatter    = String "scatter"
   toJSON Pie        = String "pie"
   toJSON Donut      = String "donut"
-  toJSON (Gauge g)  = object [ "gauge" .= toJSON g]
+  toJSON (Gauge _)  = String "gauge"
