@@ -3,12 +3,13 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module C3.Types where
 
-import           Data.Aeson
-import           Data.Monoid ((<>))
-import           Data.Text   (Text)
-import           Data.Text (pack, toLower)
-import           GHCJS.Types (JSVal)
-import           Data.Vector (fromList)
+import Data.Aeson
+import Data.Default
+import Data.Maybe (catMaybes )
+import Data.Monoid ((<>))
+import Data.Text (Text)
+import Data.Vector (fromList)
+import GHCJS.Types (JSVal)
 
 import C3.Chart.Gauge
 
@@ -32,9 +33,13 @@ data ChartOptions = ChartOptions
   , chartSizeOptions :: Maybe ChartSizeOptions
   }
 
+instance Default ChartSizeOptions where
+  def = ChartSizeOptions Nothing Nothing
+
 data ChartSizeOptions
   = ChartSizeOptions
-  { chartSizeOptionsHeight :: Int
+  { chartSizeOptionsHeight :: Maybe Int
+  , chartSizeOptionsWidth :: Maybe Int
   }
 
 -- | The data source for our chart.
@@ -96,8 +101,9 @@ instance ToJSON ChartOptions where
        Just sizeOpts -> [ "size" .= toJSON sizeOpts ]
 
 instance ToJSON ChartSizeOptions where
-  toJSON ChartSizeOptions{..} = object [
-    "height" .= chartSizeOptionsHeight ]
+  toJSON ChartSizeOptions{..} = object $ catMaybes [
+      "height" .=? chartSizeOptionsHeight
+    , "width"  .=? chartSizeOptionsWidth ]
 
 instance ToJSON ChartData where
   toJSON ChartData{..} = object conjoined

@@ -7,6 +7,7 @@ import Data.Default
 
 import C3
 import C3.Chart.Gauge
+import C3.Chart
 
 main :: IO ()
 main = do
@@ -44,13 +45,13 @@ mainColumns = Columns
   ]
 
 largerChart :: Maybe ChartSizeOptions
-largerChart = Just $ ChartSizeOptions 250
+largerChart = Just $ def { chartSizeOptionsHeight = Just 250 }
 
 pieData :: Datum
 pieData = Rows ["US", "Them"] [[60],[40]]
 
 pieData2 :: Datum
-pieData2 = Rows ["US", "Them", "something", "Gary Busey"] [[10],[5],[4],[8]]
+pieData2 = fromKeyValue $ zip ["US", "Them", "something", "Gary Busey"] [10,5,4,8]
 
 gaugeOpts :: GaugeOpts
 gaugeOpts = def { gaugeWidth = Just 25 }

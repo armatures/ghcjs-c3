@@ -17,6 +17,7 @@ library
   exposed-modules:     C3
                      , C3.Foreign
                      , C3.Types
+                     , C3.Chart
                      , C3.Chart.Gauge
   ghc-options:         -Wall
   build-depends:       aeson
