@@ -3,8 +3,10 @@ module Main where
 
 import Control.Concurrent (threadDelay)
 import Control.Monad      (forever, forM_)
+import Data.Default
 
 import C3
+import C3.Chart.Gauge
 
 main :: IO ()
 main = do
@@ -51,4 +53,4 @@ pieData2 :: Datum
 pieData2 = Rows ["US", "Them", "something", "Gary Busey"] [[10,5,15,70]]
 
 gaugeOpts :: GaugeOpts
-gaugeOpts = GaugeOpt 0 100 "PERCENT" 138
+gaugeOpts = def { gaugeWidth = Just 138 }

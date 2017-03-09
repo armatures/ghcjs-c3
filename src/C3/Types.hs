@@ -4,10 +4,13 @@
 module C3.Types where
 
 import           Data.Aeson
+import           Data.Monoid ((<>))
 import           Data.Text   (Text)
 import           Data.Text (pack, toLower)
 import           GHCJS.Types (JSVal)
 import           Data.Vector (fromList)
+
+import C3.Chart.Gauge
 
 -- | A reference to the chart object returned by C3.
 newtype Chart = Chart { getChart :: JSVal }
@@ -31,7 +34,7 @@ data ChartOptions = ChartOptions
 
 data ChartSizeOptions
   = ChartSizeOptions
-  { _chart_size_height :: Int
+  { chartSizeOptionsHeight :: Int
   }
 
 -- | The data source for our chart.
@@ -64,14 +67,6 @@ data Column = Column
   , columnValues :: [Double]
   }
 
-data GaugeOpts
-  = GaugeOpt
-  { _gauge_min :: Int
-  , _gauge_max :: Int
-  , _gauge_units :: Text
-  , _gauge_width :: Int
-  } deriving Show
-
 -- | The type of chart.
 data ChartType
   = Line
@@ -87,42 +82,31 @@ data ChartType
   | Gauge GaugeOpts
   deriving Show
 
+
 instance ToJSON ChartOptions where
-  toJSON ChartOptions{..} = object [
-    "bindto" .= bindTo,
-    "data"   .= chartData,
-    header .= chartType chartData]
-    where
-      header = case chartType chartData of
-        (Gauge _) -> "gauge"
-        g -> toLower $ pack $ show g
+  toJSON ChartOptions{..}
+    | Gauge opts <- chartType chartData = object (base ++ ["gauge" .= opts])
+    | otherwise = object base
+   where
+     base = [
+         "bindto" .= bindTo
+       , "data"   .= chartData ] <> msize
+     msize = case chartSizeOptions of
+       Nothing -> mempty
+       Just sizeOpts -> [ "size" .= toJSON sizeOpts ]
 
 instance ToJSON ChartSizeOptions where
   toJSON ChartSizeOptions{..} = object [
-    "height" .= _chart_size_height]
+    "height" .= chartSizeOptionsHeight ]
 
 instance ToJSON ChartData where
   toJSON ChartData{..} = object conjoined
     where
-      base = [ "type"    .= dumbType chartType ]
-      --XXX would be nice to `toJSON chartDatum` and combine with base
+      base = [ "type"    .= toJSON chartType ]
       conjoined =  base ++ datum
       datum = case chartDatum of
-        --XXX this should use the Rows toJSON instance (related to above)
         Rows h r -> ["rows" .= [map toJSON h, map toJSON r] ]
         Columns c -> ["columns" .= toJSON c]
-
-      dumbType :: ChartType -> Text
-      dumbType (Gauge _) = "gauge"
-      dumbType o = toLower $ pack $ show o
-
-instance ToJSON GaugeOpts where
-  toJSON GaugeOpt{..} = object [
-      "min"   .= _gauge_min
-    , "max"   .= _gauge_max
-    , "units" .= _gauge_units
-    , "width" .= _gauge_width
-    ]
 
 instance ToJSON ChartType where
   toJSON Line       = String "line"
