@@ -5,7 +5,7 @@ module C3.Types where
 
 import Data.Aeson
 import Data.Default
-import Data.Maybe (catMaybes )
+import Data.Maybe (catMaybes)
 import Data.Monoid ((<>))
 import Data.Text (Text)
 import Data.Vector (fromList)
@@ -52,13 +52,11 @@ data ChartData = ChartData
 
 data Datum
   = Columns [Column]
-  | Rows [Text] [[Double]]
-  -- | Url Text
   -- | Json Text
+  -- | Row [Text] [[Double]]
+  -- | Url Text
 
 instance ToJSON Datum where
-  toJSON (Rows rowHeaders rowValues) = object [
-    "rows" .= [map toJSON rowHeaders, map toJSON rowValues] ]
   toJSON (Columns columns) = object [ "columns" .= map toJSON columns ]
 
 instance ToJSON Column where
@@ -111,7 +109,6 @@ instance ToJSON ChartData where
       base = [ "type"    .= toJSON chartType ]
       conjoined =  base ++ datum
       datum = case chartDatum of
-        Rows h r -> ["rows" .= [map toJSON h, map toJSON r] ]
         Columns c -> ["columns" .= toJSON c]
 
 instance ToJSON ChartType where

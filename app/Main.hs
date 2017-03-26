@@ -48,7 +48,7 @@ largerChart :: Maybe ChartSizeOptions
 largerChart = Just $ def { chartSizeOptionsHeight = Just 250 }
 
 pieData :: Datum
-pieData = Rows ["US", "Them"] [[60],[40]]
+pieData = Columns [ Column "US" [60], Column "Them" [40]]
 
 pieData2 :: Datum
 pieData2 = fromKeyValue $ zip ["US", "Them", "something", "Gary Busey"] [10,5,4,8]
