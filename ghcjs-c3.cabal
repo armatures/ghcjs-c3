@@ -17,10 +17,13 @@ library
   exposed-modules:     C3
                      , C3.Foreign
                      , C3.Types
+                     , C3.Chart
+                     , C3.Chart.Gauge
   ghc-options:         -Wall
   build-depends:       aeson
                      , base >= 4.7 && < 5
                      , ghcjs-base
+                     , data-default
                      , text
                      , time
                      , vector
@@ -32,6 +35,7 @@ executable ghcjs-c3-exe
   ghc-options:         -Wall
   build-depends:       base
                      , ghcjs-c3
+                     , data-default
   default-language:    Haskell2010
 
 test-suite ghcjs-c3-test
