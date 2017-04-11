@@ -4,6 +4,7 @@ module Main where
 import Control.Concurrent (threadDelay)
 import Control.Monad      (forever, forM_)
 import Data.Default
+import Data.HashMap.Lazy as Map
 
 import C3
 import C3.Chart.Gauge
@@ -28,11 +29,11 @@ main = do
   where
     second = 1000000
     opts = ChartOptions "#chart" chartDatas Nothing
-    chartDatas = ChartData Bar mainColumns
+    chartDatas = ChartData Bar mainColumns Nothing
     gaugeChartOpt = ChartOptions "#gauge-chart" gaugeData largerChart
-    gaugeData = ChartData (Gauge gaugeOpts) gaugeColumns1
+    gaugeData = ChartData (Gauge gaugeOpts) gaugeColumns1 (Just $ Map.insert "whatever" "#2200ff" Map.empty)
 
-    pieChartOpt = ChartOptions "#pie-chart" (ChartData Pie pieData) Nothing
+    pieChartOpt = ChartOptions "#pie-chart" (ChartData Pie pieData Nothing ) Nothing
 
 gaugeColumns1 :: Datum
 gaugeColumns1 = Columns

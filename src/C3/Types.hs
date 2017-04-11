@@ -5,7 +5,8 @@ module C3.Types where
 
 import Data.Aeson
 import Data.Default
-import Data.Maybe (catMaybes)
+import Data.HashMap.Lazy (HashMap)
+import Data.Maybe (catMaybes, fromMaybe)
 import Data.Monoid ((<>))
 import Data.Text (Text)
 import Data.Vector (fromList)
@@ -13,6 +14,7 @@ import GHCJS.Types (JSVal)
 
 import C3.Chart.Gauge
 
+type Map = HashMap
 -- | A reference to the chart object returned by C3.
 newtype Chart = Chart { getChart :: JSVal }
 newtype DataIndex = DataIndex { ids :: Text } deriving ToJSON
@@ -48,7 +50,10 @@ data ChartData = ChartData
     chartType    :: ChartType
     -- | The columns of data.
   , chartDatum :: Datum
+  , chartColors :: Maybe (Map Text Text)
   }
+
+-- data Color = Hex Text
 
 data Datum
   = Columns [Column]
@@ -107,9 +112,12 @@ instance ToJSON ChartData where
   toJSON ChartData{..} = object conjoined
     where
       base = [ "type"    .= toJSON chartType ]
-      conjoined =  base ++ datum
+      conjoined =  base ++ datum ++ fromMaybe [] colors
       datum = case chartDatum of
         Columns c -> ["columns" .= toJSON c]
+      colors = case chartColors of
+        Nothing -> Nothing
+        Just cs -> Just $ ["colors" .= toJSON cs ]
 
 instance ToJSON ChartType where
   toJSON Line       = String "line"
