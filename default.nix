@@ -1,5 +1,5 @@
-{ mkDerivation, aeson, base, data-default, ghcjs-base, stdenv, text
-, time, vector
+{ mkDerivation, aeson, base, data-default, ghcjs-base, ghcjs-json
+, stdenv, text, time, vector
 }:
 mkDerivation {
   pname = "ghcjs-c3";
@@ -8,7 +8,7 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base data-default ghcjs-base text time vector
+    aeson base data-default ghcjs-base ghcjs-json text time vector
   ];
   executableHaskellDepends = [ base data-default ];
   testHaskellDepends = [ base ];

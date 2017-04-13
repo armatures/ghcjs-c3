@@ -5,14 +5,15 @@ module C3
   , load
   ) where
 
-import GHCJS.Marshal (toJSVal_aeson)
+import Control.Monad ((<=<))
+import JavaScript.JSON.Types.ToJSVal (toJSVal_aeson)
 
 import C3.Foreign as X
 import C3.Types   as X
 
 -- | Generate a chart using C3.
 generate :: ChartOptions -> IO Chart
-generate = (=<<) js_c3_generate . toJSVal_aeson
+generate = js_c3_generate <=< toJSVal_aeson
 
 -- | Load new data into an existing chart
 load :: Chart -> Datum -> IO Chart

@@ -22,8 +22,9 @@ library
   ghc-options:         -Wall
   build-depends:       aeson
                      , base >= 4.7 && < 5
-                     , ghcjs-base
                      , data-default
+                     , ghcjs-base
+                     , ghcjs-json
                      , text
                      , time
                      , vector
