@@ -1,5 +1,6 @@
 module C3 
   ( module X
+  , create
   , generate
   , transform
   , load
@@ -10,6 +11,12 @@ import JavaScript.JSON.Types.ToJSVal (toJSVal_aeson)
 
 import C3.Foreign as X
 import C3.Types   as X
+
+-- | Both creates the container and puts the chart in it
+create :: ChartOptions -> IO Chart
+create opts = do
+  js_createChartContainer (bindTo opts)
+  generate opts
 
 -- | Generate a chart using C3.
 generate :: ChartOptions -> IO Chart
