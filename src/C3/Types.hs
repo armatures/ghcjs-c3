@@ -5,7 +5,7 @@ module C3.Types where
 
 import Data.Aeson
 import Data.Default
-import Data.Maybe (catMaybes)
+import Data.Maybe (fromMaybe, catMaybes)
 import Data.Monoid ((<>))
 import Data.Text (Text)
 import Data.Vector (fromList)
@@ -48,6 +48,7 @@ data ChartData = ChartData
     chartType    :: ChartType
     -- | The columns of data.
   , chartDatum :: Datum
+  , chartGroups :: Maybe [Text]
   }
 
 data Datum
@@ -106,7 +107,8 @@ instance ToJSON ChartSizeOptions where
 instance ToJSON ChartData where
   toJSON ChartData{..} = object conjoined
     where
-      base = [ "type"    .= toJSON chartType ]
+      base = [ "type"    .= toJSON chartType ] ++ catMaybes mgroups
+      mgroups = [ "groups" .=? chartGroups ]
       conjoined =  base ++ datum
       datum = case chartDatum of
         Columns c -> ["columns" .= toJSON c]

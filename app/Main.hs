@@ -28,11 +28,11 @@ main = do
   where
     second = 1000000
     opts = ChartOptions "#chart" chartDatas Nothing
-    chartDatas = ChartData Bar mainColumns
+    chartDatas = ChartData Bar mainColumns Nothing
     gaugeChartOpt = ChartOptions "#gauge-chart" gaugeData largerChart
-    gaugeData = ChartData (Gauge gaugeOpts) gaugeColumns1
+    gaugeData = ChartData (Gauge gaugeOpts) gaugeColumns1 Nothing
 
-    pieChartOpt = ChartOptions "#pie-chart" (ChartData Pie pieData) Nothing
+    pieChartOpt = ChartOptions "#pie-chart" (ChartData Pie pieData Nothing) Nothing
 
 gaugeColumns1 :: Datum
 gaugeColumns1 = Columns
