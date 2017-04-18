@@ -13,7 +13,6 @@ import Data.Monoid ((<>))
 import Data.Text (Text)
 import Data.Vector (fromList)
 import GHCJS.Types (JSVal)
-import qualified Data.HashMap.Strict as Map
 
 import C3.Chart.Gauge
 
@@ -85,7 +84,7 @@ data OptionalChartData
 
 instance Default OptionalChartData where
   def = OptionalChartData
-    { _chartGroups = Nothing
+    { _chartGroups = Just $ [ Group [] ]
     , _chartColors = Nothing
     }
 
@@ -149,8 +148,8 @@ instance ToJSON ChartData where
       conjoined =  base ++ datum ++ optional
       datum = case _chartDatum of
         Columns c -> ["columns" .= toJSON c]
-      optional = catMaybes [ "groups" .=? fmap _chartGroups _chartOptionalData
-        , "colors" .=? fmap _chartColors _chartOptionalData ]
+      optional = catMaybes [ "groups" .=? (fmap (toJSON . _chartGroups) _chartOptionalData)
+        , "colors" .=? (fmap (toJSON . _chartColors) _chartOptionalData) ]
 
 instance ToJSON OptionalChartData where
   toJSON OptionalChartData{..} = object $ catMaybes [
@@ -158,10 +157,8 @@ instance ToJSON OptionalChartData where
     , "colors" .=? _chartColors ]
 
 instance ToJSON Colors where
-  toJSON (Colors colors) = object [ "colors" .= map toJSON colors ]
-
-instance ToJSON Color where
-  toJSON (Color i c) = object [ i .= c]
+  toJSON (Colors colors) = object $ fmap m colors
+    where m (Color i c) = (i .= c)
 
 instance ToJSON ChartType where
   toJSON Line       = String "line"
@@ -177,4 +174,5 @@ instance ToJSON ChartType where
   toJSON (Gauge _)  = String "gauge"
 
 makeLenses ''ChartOptions
+makeLenses ''OptionalChartData
 makeLenses ''ChartData

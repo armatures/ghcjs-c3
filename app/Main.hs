@@ -26,12 +26,15 @@ main = do
   _ <- load pieChart pieData2
   chart <- generate $ def & bindTo .~ "chart"
                           & chartData . chartDatum .~ mainColumns
+                          & chartData . chartOptionalData .~ Just optionalData
   forever $ do
     forM_ [Area, Pie, Donut, Step] $ \typ -> do
       threadDelay (2 * second)
       transform chart typ
   where
     second = 1000000
+    optionalData :: OptionalChartData
+    optionalData = def & chartColors .~ Just (Colors [ Color "data1" "#334455"])
     gaugeData = def & chartType .~ Gauge gaugeOpts
                     & chartDatum .~ gaugeColumns1
 
