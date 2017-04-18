@@ -1,3 +1,4 @@
 .stack-work
 all.js
 node_modules
+dist/

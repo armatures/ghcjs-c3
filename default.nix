@@ -1,4 +1,4 @@
-{ mkDerivation, aeson, base, data-default, ghcjs-base, ghcjs-json
+{ mkDerivation, aeson, base, lens, data-default, ghcjs-base, ghcjs-json
 , stdenv, text, time, vector
 }:
 mkDerivation {
@@ -8,9 +8,9 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base data-default ghcjs-base ghcjs-json text time vector
+    aeson base data-default lens ghcjs-base ghcjs-json text time vector
   ];
-  executableHaskellDepends = [ base data-default ];
+  executableHaskellDepends = [ base ];
   testHaskellDepends = [ base ];
   homepage = "https://github.com/mbeidler/ghcjs-c3#readme";
   description = "C3 bindings for GHCJS";
