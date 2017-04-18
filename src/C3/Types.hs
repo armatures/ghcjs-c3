@@ -1,15 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module C3.Types where
 
 import Data.Aeson
+import Control.Lens (makeLenses)
+import Data.Maybe (catMaybes)
 import Data.Default
-import Data.Maybe (fromMaybe, catMaybes)
 import Data.Monoid ((<>))
 import Data.Text (Text)
 import Data.Vector (fromList)
 import GHCJS.Types (JSVal)
+import qualified Data.HashMap.Strict as Map
 
 import C3.Chart.Gauge
 
@@ -27,29 +31,58 @@ infixr 6 .=?
 -- | The definition of the chart we want to generate.
 data ChartOptions = ChartOptions
   { -- | The CSS selector the chart will be set to.
-    bindTo    :: Text
+    _bindTo    :: Text
     -- | The data sourcing the chart.
-  , chartData :: ChartData
-  , chartSizeOptions :: Maybe ChartSizeOptions
+  , _chartData :: ChartData
+  , _chartSizeOptions :: Maybe ChartSizeOptions
+  }
+
+instance Default ChartOptions where
+  def = ChartOptions "my-chart" def def
+
+data ChartSizeOptions
+  = ChartSizeOptions
+  { _chartHeight :: Maybe Int
+  , _chartWidth :: Maybe Int
   }
 
 instance Default ChartSizeOptions where
   def = ChartSizeOptions Nothing Nothing
 
-data ChartSizeOptions
-  = ChartSizeOptions
-  { chartSizeOptionsHeight :: Maybe Int
-  , chartSizeOptionsWidth :: Maybe Int
-  }
-
 -- | The data source for our chart.
 data ChartData = ChartData
   { -- | The chart type.
-    chartType    :: ChartType
+    _chartType    :: ChartType
     -- | The columns of data.
-  , chartDatum :: Datum
-  , chartGroups :: Maybe [Text]
+  , _chartDatum :: Datum
+  , _chartOptionalData :: Maybe OptionalChartData
   }
+
+
+instance Default ChartData where
+  def = ChartData Bar (Columns []) Nothing
+
+-- XXX  attach this to a column definition somehow to avoid errors
+type DatumIndex = Text
+
+data Color
+  = Color
+  { datumIndex :: DatumIndex
+  , colorHex :: Text
+  }
+
+data Colors = Colors [Color]
+data OptionalChartData
+  = OptionalChartData
+  { _chartGroups :: Maybe [Text]
+  , _chartColors :: Maybe Colors
+  }
+
+instance Default OptionalChartData where
+  def = OptionalChartData
+    { _chartGroups = Nothing
+    , _chartColors = Nothing
+    }
 
 data Datum
   = Columns [Column]
@@ -89,29 +122,41 @@ data ChartType
 
 instance ToJSON ChartOptions where
   toJSON ChartOptions{..}
-    | Gauge opts <- chartType chartData = object (base ++ ["gauge" .= opts])
+    | Gauge opts <- _chartType _chartData = object (base ++ ["gauge" .= opts])
     | otherwise = object base
    where
      base = [
-         "bindto" .= bindTo
-       , "data"   .= chartData ] <> msize
-     msize = case chartSizeOptions of
+         "bindto" .= ("#" <> _bindTo)
+       , "data"   .= _chartData ] <> msize
+     msize = case _chartSizeOptions of
        Nothing -> mempty
        Just sizeOpts -> [ "size" .= toJSON sizeOpts ]
 
 instance ToJSON ChartSizeOptions where
   toJSON ChartSizeOptions{..} = object $ catMaybes [
-      "height" .=? chartSizeOptionsHeight
-    , "width"  .=? chartSizeOptionsWidth ]
+      "height" .=? _chartHeight
+    , "width"  .=? _chartWidth ]
 
 instance ToJSON ChartData where
   toJSON ChartData{..} = object conjoined
     where
-      base = [ "type"    .= toJSON chartType ] ++ catMaybes mgroups
-      mgroups = [ "groups" .=? chartGroups ]
-      conjoined =  base ++ datum
-      datum = case chartDatum of
+      base = [ "type"    .= toJSON _chartType ]
+      conjoined =  base ++ datum ++ optional
+      datum = case _chartDatum of
         Columns c -> ["columns" .= toJSON c]
+      optional = catMaybes [ "groups" .=? fmap _chartGroups _chartOptionalData
+        , "colors" .=? fmap _chartColors _chartOptionalData ]
+
+instance ToJSON OptionalChartData where
+  toJSON OptionalChartData{..} = object $ catMaybes [
+      "groups" .=? _chartGroups
+    , "colors" .=? _chartColors ]
+
+instance ToJSON Colors where
+  toJSON (Colors colors) = object [ "colors" .= map toJSON colors ]
+
+instance ToJSON Color where
+  toJSON (Color i c) = object [ i .= c]
 
 instance ToJSON ChartType where
   toJSON Line       = String "line"
@@ -125,3 +170,6 @@ instance ToJSON ChartType where
   toJSON Pie        = String "pie"
   toJSON Donut      = String "donut"
   toJSON (Gauge _)  = String "gauge"
+
+makeLenses ''ChartOptions
+makeLenses ''ChartData

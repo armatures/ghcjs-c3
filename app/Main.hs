@@ -4,6 +4,7 @@ module Main where
 import Control.Concurrent (threadDelay)
 import Control.Monad      (forever, forM_)
 import Data.Default
+import Control.Lens hiding (transform)
 
 import C3
 import C3.Chart.Gauge
@@ -14,25 +15,25 @@ main = do
   js_createChartContainer "gauge-chart"
   js_createChartContainer "pie-chart"
   js_createChartContainer "chart"
-  gaugeChart <- generate gaugeChartOpt
-  pieChart <- generate pieChartOpt
+  gaugeChart <- generate $ def & bindTo .~ "gauge-chart"
+                               & chartData .~ gaugeData
+                               & chartSizeOptions .~ largerChart
+  pieChart <- generate $ def & bindTo .~ "pie-chart"
+                             & chartData . chartDatum .~ pieData
   threadDelay (2 * second)
   _ <- load gaugeChart $ Columns [ Column "whatever" [80.9] ]
   threadDelay (2 * second)
   _ <- load pieChart pieData2
-  chart <- generate opts
+  chart <- generate $ def & bindTo .~ "chart"
+                          & chartData . chartDatum .~ mainColumns
   forever $ do
     forM_ [Area, Pie, Donut, Step] $ \typ -> do
       threadDelay (2 * second)
       transform chart typ
   where
     second = 1000000
-    opts = ChartOptions "#chart" chartDatas Nothing
-    chartDatas = ChartData Bar mainColumns Nothing
-    gaugeChartOpt = ChartOptions "#gauge-chart" gaugeData largerChart
-    gaugeData = ChartData (Gauge gaugeOpts) gaugeColumns1 Nothing
-
-    pieChartOpt = ChartOptions "#pie-chart" (ChartData Pie pieData Nothing) Nothing
+    gaugeData = def & chartType .~ Gauge gaugeOpts
+                    & chartDatum .~ gaugeColumns1
 
 gaugeColumns1 :: Datum
 gaugeColumns1 = Columns
@@ -45,7 +46,7 @@ mainColumns = Columns
   ]
 
 largerChart :: Maybe ChartSizeOptions
-largerChart = Just $ def { chartSizeOptionsHeight = Just 250 }
+largerChart = Just $ def { _chartHeight = Just 250 }
 
 pieData :: Datum
 pieData = Columns [ Column "US" [60], Column "Them" [40]]

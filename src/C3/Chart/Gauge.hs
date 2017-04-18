@@ -3,8 +3,8 @@
 module C3.Chart.Gauge where
 
 import Data.Aeson
-import Data.Default
 import Data.Text
+import Data.Default
 
 data GaugeOpts = GaugeOpts
   { gaugeExpand :: Bool
