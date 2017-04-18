@@ -71,10 +71,15 @@ data Color
   , colorHex :: Text
   }
 
-data Colors = Colors [Color]
+newtype Colors = Colors { unColors :: [Color] }
+newtype Group = Group { unGroup :: [Text] }
+
+instance ToJSON Group where
+  toJSON (Group gs) = toJSON gs
+
 data OptionalChartData
   = OptionalChartData
-  { _chartGroups :: Maybe [Text]
+  { _chartGroups :: Maybe [Group]
   , _chartColors :: Maybe Colors
   }
 
